@@ -36,7 +36,7 @@ if platform?("ubuntu", "debian")
       lang_settings << "#{k.upcase}=#{v}" unless v.nil?
     }
 
-    command_string = "update-locale #{lang_settings.join(' ')}"
+    command_string = "update-locale --reset #{lang_settings.join(' ')}"
     Chef::Log.debug("locale command is #{command_string.inspect}")
     command command_string
   end
