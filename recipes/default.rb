@@ -29,7 +29,6 @@ if platform?("ubuntu", "debian")
   end
 
   execute "Update locale" do
-    not_if "cat /etc/default/locale | grep -qx LANG=#{node[:locale][:lang]}"
     lang_settings = ["LANG=#{node[:locale][:lang]}"]
     lang_settings << "LANGUAGE=#{node[:locale][:language]}" unless node[:locale][:language].nil?
     node[:locale].select { |k,v| k =~ /lc_.*/ }.each { |k, v|
@@ -38,7 +37,13 @@ if platform?("ubuntu", "debian")
 
     command_string = "update-locale --reset #{lang_settings.join(' ')}"
     Chef::Log.debug("locale command is #{command_string.inspect}")
+
+    not_if_grep = lang_settings.map { |s| "-e '^#{s}$'" }.join(' ')
+    not_if_command_string = "test $(grep #{not_if_grep} /etc/default/locale | uniq | wc -l) -eq #{lang_settings.count}"
+    Chef::Log.debug("locale test command is #{not_if_command_string.inspect}")
+
     command command_string
+    not_if  not_if_command_string
   end
 
 end
