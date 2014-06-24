@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+lang = node[:locale][:lang]
+lc_all = node[:locale][:lc_all]
+
 if platform?("ubuntu", "debian")
 
   package "locales" do
@@ -43,17 +46,24 @@ if platform?("ubuntu", "debian")
     Chef::Log.debug("locale test command is #{not_if_command_string.inspect}")
 
     command command_string
-    not_if  not_if_command_string
+    not_if { Locale.up_to_date?("/etc/default/locale", lang_settings) }
   end
 
 end
 
 if platform?("redhat", "centos", "fedora")
 
-  execute "Update locale" do
-    command "locale -a | grep -qx #{node[:locale][:lang]} && sed -i 's|LANG=.*|LANG=#{node[:locale][:lang]}|' /etc/sysconfig/i18n"
-    not_if "grep -qx LANG=#{node[:locale][:lang]} /etc/sysconfig/i18n"
+  locale_file_path = "/etc/sysconfig/i18n"
+
+  file locale_file_path do
+    content lazy {
+      locale = IO.read(locale_file_path)
+      variables = Hash[locale.lines.map { |line| line.strip.split("=") }]
+      variables["LANG"] = lang
+      variables["LC_ALL"] = lc_all
+      variables.map { |pairs| pairs.join("=") }.join("\n") + "\n"
+    }
+    not_if { Locale.up_to_date?(locale_file_path, lang, lc_all) }
   end
 
 end
-

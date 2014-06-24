@@ -3,8 +3,8 @@ Description
 
 Sets default system locale
 
-You can see which languages are available by 
-$ locale -a 
+You can see which languages are available by
+$ locale -a
 
 On debian based systems you can set the locale by running
  update-locale LANG={lang} LANGUAGE={lang}
@@ -27,8 +27,8 @@ For docs see:
 On rhel based systems you can set default locale updating /etc/sysconfig/i18n
 There doesn't seem to be a command line tool to update this file?!?
 
-Requirements
-============
+Platforms
+=========
 
 Tested on Ubuntu, CentOS
 
